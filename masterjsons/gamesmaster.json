@@ -1,0 +1,12 @@
+{
+    "games": [
+        {
+            "name": "game",
+            "cost": 0,
+            "maxPlayers": 0,
+            "gameNightPlayable": false,
+            "platform": [],
+            "alias": []
+        }
+    ]
+}

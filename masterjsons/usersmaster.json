@@ -1,0 +1,11 @@
+{
+    "users": [
+        {
+            "discordname": "user",
+            "realname": "realname",
+            "nick": "nick",
+            "tracking": true,
+            "games": []
+        }
+    ]
+}

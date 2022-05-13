@@ -1,0 +1,12 @@
+{
+    "events": [
+        {
+            "name": "example",
+            "description": null,
+            "location": "#channel",
+            "datetime": "2022-05-03T20:00:30",
+            "daystillrepeat": "",
+            "responses": []
+        }
+    ]
+}

@@ -1,0 +1,177 @@
+{
+    "users": [
+        {
+            "discordname": "RoRixu",
+            "realname": "Dylan",
+            "nick": "Dyl",
+            "tracking": true,
+            "games": [
+                "League of Legends",
+                "Rocket League",
+                "Apex Legends",
+                "Counter-Strike: Global Offensive"
+            ]
+        },
+        {
+            "discordname": "KaRoxu",
+            "realname": null,
+            "nick": "test",
+            "tracking": false,
+            "games": [
+                "League of Legends",
+                "Rocket League"
+            ]
+        },
+        {
+            "discordname": "Stu",
+            "realname": "Stuart",
+            "nick": "Stu",
+            "tracking": true,
+            "games": []
+        },
+        {
+            "discordname": "DaGuy",
+            "realname": "Logan",
+            "nick": "Logan",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "rilla12",
+            "realname": null,
+            "nick": "big GE Dino Dick",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "jmthomg",
+            "realname": null,
+            "nick": "machuDICKchu",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Ren Niijima",
+            "realname": null,
+            "nick": "Jordon",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "materjuice",
+            "realname": null,
+            "nick": "Arthur",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "donjohnsontpt",
+            "realname": "Don",
+            "nick": "Don",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "awjone0",
+            "realname": null,
+            "nick": "Tony",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "wryn",
+            "realname": "Makala",
+            "nick": "Makala",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "woodtotheword",
+            "realname": null,
+            "nick": "Eric",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Murph",
+            "realname": null,
+            "nick": "Murph",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Sneaky",
+            "realname": null,
+            "nick": "Sneaky",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "TheoreticalYarn",
+            "realname": null,
+            "nick": "TheoreticalYarn",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "STUUUUUUU",
+            "realname": null,
+            "nick": "STUUUUUUU",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "AppaDaStappa",
+            "realname": "Justin",
+            "nick": "Justin",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Jet Winsliner",
+            "realname": "Nathan",
+            "nick": "Nathan",
+            "tracking": true,
+            "games": [
+                "Counter-Strike: Global Offensive"
+            ]
+        },
+        {
+            "discordname": "Zercules",
+            "realname": null,
+            "nick": "Zercules",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Jon",
+            "realname": null,
+            "nick": "Jon",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Pesky Moth",
+            "realname": "Austin",
+            "nick": "Sprinkles",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Baarefacekillah",
+            "realname": null,
+            "nick": "Baarefacekillah",
+            "tracking": false,
+            "games": []
+        },
+        {
+            "discordname": "Masterofnone",
+            "realname": "ScottHolliday",
+            "nick": "Scott",
+            "tracking": true,
+            "games": [
+                "Counter-Strike: Global Offensive"
+            ]
+        }
+    ]
+}

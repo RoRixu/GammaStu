@@ -1,0 +1,16 @@
+Among Us,5,10,Steam,
+CS:GO,0,10,Steam,
+Garrys Mod,10,20,Steam,Gmod
+Stick Fight,5,4,Steam,
+Rocket League,0,8,Epic Games,
+Halo 3,10,16,Steam,
+Valorant,0,10,Riot,
+Starcraft 2,0,8,Battle.net,SC2
+Brawlhalla,0,8,Steam,
+Heros of the Storm,0,10,Battle.net,Heros
+Magic: The Gathering,0,4,Web,MTG,mtg
+League of Legends,0,10,Riot,lol,league
+Paladins,0,10,Steam,
+Disc Space,0,10,Steam,
+Overwatch,20,12,battle.net,
+Sea of Thieves,40,4,Steam,

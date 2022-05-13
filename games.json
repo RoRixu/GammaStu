@@ -1,0 +1,35 @@
+{
+    "games": [
+        {
+            "name": "League of Legends",
+            "cost": 0,
+            "maxPlayers": 10,
+            "gameNightPlayable": false,
+            "platform": [],
+            "alias": [
+                "lol",
+                "league"
+            ]
+        },
+        {
+            "name": "Rocket League",
+            "cost": 0,
+            "maxPlayers": 8,
+            "gameNightPlayable": true,
+            "platform": [],
+            "alias": []
+        },
+        {
+            "name": "testing",
+            "cost": 20,
+            "maxPlayers": 1,
+            "gameNightPlayable": true,
+            "platform": [
+                "epic"
+            ],
+            "alias": [
+                "1"
+            ]
+        }
+    ]
+}

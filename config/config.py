@@ -1,14 +1,11 @@
 from cogs.Users import userlist
 from cogs.Games import gamelist
 from cogs.Events import eventlist
-from datetime import datetime
-
 
 TOKEN = "token"
-GUILD = "guildid"
 APP_ID = "appid"
+GUILD = "guildid"
 GAMENIGHTCHANNEL = "gamenightchannelid"
-
 
 listofUsers = userlist.userlist()
 listofGames = gamelist.gameList()

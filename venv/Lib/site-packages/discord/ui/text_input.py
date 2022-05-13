@@ -25,7 +25,7 @@ DEALINGS IN THE SOFTWARE.
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Optional, Tuple, TypeVar
+from typing import TYPE_CHECKING, Literal, Optional, Tuple, TypeVar
 
 from ..components import TextInput as TextInputComponent
 from ..enums import ComponentType, TextStyle
@@ -51,6 +51,12 @@ V = TypeVar('V', bound='View', covariant=True)
 
 class TextInput(Item[V]):
     """Represents a UI text input.
+
+    .. container:: operations
+
+        .. describe:: str(x)
+
+            Returns the value of the text input or an empty string if the value is ``None``.
 
     .. versionadded:: 2.0
 
@@ -231,7 +237,7 @@ class TextInput(Item[V]):
         )
 
     @property
-    def type(self) -> ComponentType:
+    def type(self) -> Literal[ComponentType.text_input]:
         return ComponentType.text_input
 
     def is_dispatchable(self) -> bool:

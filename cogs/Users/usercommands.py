@@ -29,7 +29,7 @@ class areyousure(ui.Modal):
         else:
             await interaction.response.send_message("Canceled")
 
-class UserCommands(commands.Cog,app_commands.Group,name="user"):
+class UserCommands(commands.GroupCog,name="user"):
     def __init__(self, bot: commands.Bot)->None:
         self.bot = bot
         super().__init__()

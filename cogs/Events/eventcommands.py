@@ -93,7 +93,7 @@ class pollDropdownView(discord.ui.View):
         self.add_item(pollDropdown(poll))
 
 
-class EventCommands(commands.Cog, app_commands.Group, name="event"):
+class EventCommands(commands.GroupCog, name="event"):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.checkTime.start()

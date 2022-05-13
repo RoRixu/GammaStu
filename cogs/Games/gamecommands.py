@@ -6,7 +6,7 @@ from typing import List,Literal
 from discord.ext import commands
 from discord import app_commands, ui
 
-class GameCommands(commands.Cog,app_commands.Group,name="games"):
+class GameCommands(commands.GroupCog,name="games"):
     def __init__(self, bot):
         self.bot = bot
         super().__init__()

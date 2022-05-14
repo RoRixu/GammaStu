@@ -8,11 +8,11 @@ def jsonDefEncoder(obj):
     else:  # some default behavior
         return obj.__dict__
 def writetofiles():
-    with open('users.json', 'w') as outfile:
+    with open(config.USERFILE, 'w') as outfile:
         outfile.write(json.dumps(config.listofUsers, default=jsonDefEncoder, indent=4))
-    with open("games.json", 'w') as outfile:
+    with open(config.GAMEFILE, 'w') as outfile:
         outfile.write(json.dumps(config.listofGames, default=jsonDefEncoder, indent=4))
-    with open("masterjsons/eventmaster.json", 'w') as outfile:
+    with open(config.EVENTFILE, 'w') as outfile:
         outfile.write(json.dumps(config.listofEvents, default=jsonDefEncoder, indent=4))
 def loadfiles():
     file = open(config.USERFILE, 'r')

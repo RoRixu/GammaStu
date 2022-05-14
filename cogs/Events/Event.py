@@ -38,11 +38,11 @@ class event:
         for i in self.responses:
             if i.response == config.EVENTOPTIONS[0]:
                 yes.append(i.discordname)
-            elif i.response == config.EVENTOPTIONS[0]:
+            elif i.response == config.EVENTOPTIONS[1]:
                 no.append(i.discordname)
-            elif i.response == config.EVENTOPTIONS[0]:
+            elif i.response == config.EVENTOPTIONS[2]:
                 late.append(i.discordname)
-            elif i.response == config.EVENTOPTIONS[0]:
+            elif i.response == config.EVENTOPTIONS[3]:
                 maybe.append(i.discordname)
         if len(yes) == 0:
             yes.append("None")

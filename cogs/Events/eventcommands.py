@@ -2,6 +2,7 @@ import filehandler
 import discord
 import random
 import typing
+import copy
 from datetime import datetime, timedelta
 from typing import List
 from config import config
@@ -47,7 +48,7 @@ class eventDropdown(discord.ui.Select):
 class eventDropdownView(discord.ui.View):
     def __init__(self, eventname):
         self.eventname = eventname
-        super().__init__()
+        super().__init__(timeout=None)
         self.add_item(eventDropdown(eventname))
 class eventModal(ui.Modal, title="Create Event"):
     name = ui.TextInput(label="Name of the event:", style=discord.TextStyle.short, required=True)
@@ -85,13 +86,11 @@ class pollDropdown(discord.ui.Select):
         self.poll.addResponse(discordname=interaction.user.name,response=self.values[0])
         embed = self.poll.createEmbed()
         await interaction.response.edit_message(embed=embed)
-
 class pollDropdownView(discord.ui.View):
     def __init__(self,poll):
         self.poll=poll
-        super().__init__(timeout=30)
+        super().__init__(timeout=86400)
         self.add_item(pollDropdown(poll))
-
 
 class EventCommands(commands.GroupCog, name="event"):
     def __init__(self, bot: commands.Bot) -> None:
@@ -161,11 +160,18 @@ class EventCommands(commands.GroupCog, name="event"):
         await interaction.response.send_message("A new poll has started",view=view,embed=embed)
 
 
-    @tasks.loop(minutes=config.TIMETILLHALFHOUR)
+    @tasks.loop(hours=0, minutes=1, seconds=0)
     async def checkTime(self):
+        print("next at: " + str(self.checkTime.next_iteration))
         now = datetime.now()
         next = ceil_dt(datetime.now(), timedelta(minutes=30))
-        config.TIMETILLHALFHOUR = int((next - now).total_seconds() / 60)
+        timetillnext = int((next - now).total_seconds() / 60)
+        if timetillnext == 0:
+            config.TIMETILLHALFHOUR = 30
+        else:
+            config.TIMETILLHALFHOUR = timetillnext + 1
+        self.checkTime.change_interval(minutes=config.TIMETILLHALFHOUR)
+        print("next at: "+str(self.checkTime.next_iteration))
         # check if an event is starting soon
         for event in config.listofEvents.events:
             timeTillStart = event.datetime - datetime.now()
@@ -177,19 +183,12 @@ class EventCommands(commands.GroupCog, name="event"):
             for event in config.listofEvents.events:
                 # autocreate events
                 if event.daystillrepeat != 0 and not now < event.datetime and event.daystillrepeat != "":
-                    eventName = event.name
-                    eventDescription = event.description
-                    eventLocation = event.location
-                    eventDateTime = event.datetime + timedelta(days=int(event.daystillrepeat))
-                    eventRepeating = event.daystillrepeat
-                    config.listofEvents.removeEvent(name=event.name)
-                    channel = self.getChannel(eventLocation[1:])
-                    returnstr = config.listofEvents.addEvent(name=eventName, description=eventDescription,
-                                                             location=eventLocation,
-                                                             datetime=eventDateTime, daystillrepeat=eventRepeating)
-                    eventEmbed = config.listofEvents.eventEmbed(name=eventName)
-                    await channel.send(returnstr,view=eventDropdownView(eventname=eventName),embed=eventEmbed)
-                    filehandler.writetofiles()
+                    event.datetime = event.datetime + timedelta(days=int(event.daystillrepeat))
+                    event.responses = []
+                    channel = self.getChannel(event.location[1:])
+                    returnstr = "A new event is happening in Newlore: {name}".format(name=event.name)
+                    eventEmbed = config.listofEvents.eventEmbed(name=event.name)
+                    await channel.send(returnstr,view=eventDropdownView(eventname=event.name),embed=eventEmbed)
 
                 # gamenight select
                 if event.name == "Game Night" and now.weekday() == config.DAYOFWEEKTORUNGAMENIGHTPREP:
@@ -226,13 +225,16 @@ class EventCommands(commands.GroupCog, name="event"):
                     channelName = "Game Night is: {game}".format(game=gameNightGame)
                     await gameNightChannel.edit(name=channelName)
                     return
+        filehandler.writetofiles()
+        return
+
     @checkTime.before_loop
     async def beforeCheckTime(self):
+        config.TIMETILLHALFHOUR = int(30)
         await self.bot.wait_until_ready()
     @checkTime.after_loop
     async def afterCheckTime(self):
-        checkTime.change_interval(minutes=config.TIMETILLHALFHOUR)
-
+        print("loop done")
 
 async def setup(bot: commands.Bot) -> None:
     print("Loaded event commands.")

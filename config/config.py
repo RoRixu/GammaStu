@@ -2,17 +2,17 @@ from cogs.Users import userlist
 from cogs.Games import gamelist
 from cogs.Events import eventlist
 
-TOKEN = "token"
-APP_ID = "appid"
-GUILD = "guildid"
-GAMENIGHTCHANNEL = "gamenightchannelid"
+TOKEN =  "TOKEN"
+APP_ID = "APPID"
+GUILD = "GUILDID"
+GAMENIGHTCHANNEL = "GAMENIGHTCHANNELID"
 
 listofUsers = userlist.userlist()
 listofGames = gamelist.gameList()
 listofEvents = eventlist.eventList()
 
 TIMETILLHALFHOUR = 30
-EVENTUPDATEHOUR = 2
+EVENTUPDATEHOUR = 3
 DAYOFWEEKTORUNGAMENIGHTPREP = 3
 
 USERFILE='users.json'

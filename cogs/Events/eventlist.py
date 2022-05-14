@@ -1,6 +1,3 @@
-import datetime
-import discord
-from config import config
 from cogs.Events import Event
 eventResponses = ['Will be there','Will not be there','Will be there but late','Will maybe be there']
 class eventList:
@@ -76,6 +73,8 @@ class eventList:
         else:
             returnstr = "Could not find event with name: {eventname}".formate(eventname=kwargs["name"])
             return returnstr
+
+
     def eventEmbed(self,**kwargs):
         event = self.findEvent(name=kwargs["name"])
         embed = event.eventEmbed()

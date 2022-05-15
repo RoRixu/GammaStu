@@ -47,7 +47,7 @@ class UserCommands(commands.GroupCog,name="user"):
         guildRoles = await guild.fetch_roles()
         roleToGive = None
         for role in guildRoles:
-            if not role.is_bot_managed() and role.name != "@everyone":
+            if not role.is_bot_managed() and role.name != "@everyone" and role.name in config.INTRESTROLES:
                 if roles == role.name:
                     roleToGive = role
 
@@ -64,7 +64,7 @@ class UserCommands(commands.GroupCog,name="user"):
         roles = await guild.fetch_roles()
         roleNames = []
         for role in roles:
-            if not role.is_bot_managed() and role.name != "@everyone" and not role.permissions.administrator:
+            if not role.is_bot_managed() and not role.permissions.administrator and role.name in config.INTRESTROLES:
                 roleNames.append(role.name)
         return [app_commands.Choice(name=role, value=role)
                 for role in roleNames if current.lower() in role.lower()

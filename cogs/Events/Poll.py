@@ -1,7 +1,7 @@
 import discord
 from config import config
 class poll:
-    def __init__(self,name,description,channelid,options):
+    def __init__(self,name,description,options):
         self.name = name
         self.description = description
         self.options = options

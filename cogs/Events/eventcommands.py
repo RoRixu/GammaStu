@@ -176,7 +176,7 @@ class EventCommands(commands.GroupCog, name="event"):
         for event in config.listofEvents.events:
             timeTillStart = event.datetime - datetime.now()
             if timeTillStart > timedelta(minutes=15) and timeTillStart < timedelta(minutes=45):
-                channel = EventCommands.getChannel(event.location)
+                channel = self.getChannel(event.location[1:])
                 await channel.send("{event} will be starting soon!".format(event=event.name))
         # around noon each day run task
         if now.hour == config.EVENTUPDATEHOUR and now.minute < 30:

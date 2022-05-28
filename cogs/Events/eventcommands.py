@@ -9,6 +9,7 @@ from config import config
 from discord.ext import commands, tasks
 from discord import app_commands, ui
 from cogs.Events import Poll
+from cogs.Events.Event import event
 
 eventResponses = ['Will be there', 'Will not be there', 'Will be there but late', 'Will maybe be there']
 
@@ -27,7 +28,6 @@ class eventDropdown(discord.ui.Select):
             discord.SelectOption(label=eventResponses[3], description='I\'m not good at planning ahead.', emoji='⏲️')
         ]
         super().__init__(placeholder="Will you make it to this event?", min_values=1, max_values=1, options=options)
-
     async def callback(self, interaction: discord.Interaction):
         config.listofEvents.addResponseToEvent(name=self.eventname, discordname=interaction.user.name,
                                                response=self.values[0])
@@ -73,6 +73,21 @@ class eventModal(ui.Modal, title="Create Event"):
             await interaction.response.send_message(
                 "An event with the name {name} already exsist".format(name=self.name.value))
         filehandler.writetofiles()
+class eventEditModal(ui.Modal):
+    def __init__(self,event: event,bot:discord.Client)-> None:
+        self.event = event
+        self.bot = bot
+        super().__init__(title="Editing information for {event}".format(event=event.name))
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        self.event.description = self.children[0].value
+        self.event.location = self.children[1].value
+        fulltime = datetime.strptime(self.children[2].value, "%m/%d/%y %I:%S %p")
+        self.event.datetime = fulltime
+        self.event.daystillrepeat = self.children[3].value
+        filehandler.writetofiles()
+        await interaction.response.send_message("Information for {event} has been edited".format(event=self.event.name))
+
+
 
 class pollDropdown(discord.ui.Select):
     def __init__(self, poll):
@@ -106,6 +121,40 @@ class EventCommands(commands.GroupCog, name="event"):
         channel = guild.system_channel
         return channel
 
+    @app_commands.command(name="list", description="list all events taking place in Newlore")
+    async def eventlist(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_message(config.listofEvents.listEvents())
+
+    @app_commands.command(name="info", description="View an events information")
+    @app_commands.describe(
+        event="The event to view"
+    )
+    async def eventInfo(self, interaction: discord.Interaction, event: str) -> None:
+        returnstr, embed = config.listofEvents.eventInfo(name=event)
+        await interaction.response.send_message(returnstr, embed=embed)
+
+    @app_commands.command(name="edit",description="Edit an event")
+    @app_commands.describe(
+        event = "The event to edit."
+    )
+    async def editEvent(self,interaction: discord.Interaction, event: str) -> None:
+        eventToEdit = config.listofEvents.findEvent(name=event)
+        modal = eventEditModal(eventToEdit,self.bot)
+        description = ui.TextInput(label="Description of the event", style=discord.TextStyle.long,default=eventToEdit.description,
+                                   required=False)
+        location = ui.TextInput(label="Where will the event take place?", style=discord.TextStyle.short,
+                                placeholder="Example: #all-chat", default=eventToEdit.location, required=False)
+        date = ui.TextInput(label="What day will the event take place?", style=discord.TextStyle.short,
+                            placeholder="MM/DD/YY HH:MM AM/PM",default=eventToEdit.datetime.strftime("%m/%d/%y %I:%S %p"), min_length=17, max_length=17, required=True)
+        daystillrepeat = ui.TextInput(label="Days between event", style=discord.TextStyle.short,
+                                      placeholder="Optional",default=eventToEdit.daystillrepeat, min_length=0,
+                                      max_length=2, required=False)
+        modal.add_item(description)
+        modal.add_item(location)
+        modal.add_item(date)
+        modal.add_item(daystillrepeat)
+        await interaction.response.send_modal(modal)
+
     @app_commands.command(name="add", description="Create a new event")
     async def addEvent(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_modal(eventModal())
@@ -118,17 +167,8 @@ class EventCommands(commands.GroupCog, name="event"):
         await interaction.response.send_message(config.listofEvents.removeEvent(name=event))
         filehandler.writetofiles()
 
-    @app_commands.command(name="list", description="list all events taking place in Newlore")
-    async def gamelist(self, interaction: discord.Interaction) -> None:
-        await interaction.response.send_message(config.listofEvents.listEvents())
 
-    @app_commands.command(name="info", description="View an events information")
-    @app_commands.describe(
-        event="The event to view"
-    )
-    async def eventInfo(self, interaction: discord.Interaction, event: str) -> None:
-        await interaction.response.send_message(config.listofEvents.eventInfo(name=event))
-
+    @editEvent.autocomplete('event')
     @removeEvent.autocomplete('event')
     @eventInfo.autocomplete("event")
     async def gameNameAutocomplete(self, interaction: discord.Interaction, current: str) -> List[
@@ -162,7 +202,6 @@ class EventCommands(commands.GroupCog, name="event"):
 
     @tasks.loop(hours=0, minutes=1, seconds=0)
     async def checkTime(self):
-        print("next at: " + str(self.checkTime.next_iteration))
         now = datetime.now()
         next = ceil_dt(datetime.now(), timedelta(minutes=30))
         timetillnext = int((next - now).total_seconds() / 60)
@@ -171,7 +210,6 @@ class EventCommands(commands.GroupCog, name="event"):
         else:
             config.TIMETILLHALFHOUR = timetillnext + 1
         self.checkTime.change_interval(minutes=config.TIMETILLHALFHOUR)
-        print("next at: "+str(self.checkTime.next_iteration))
         # check if an event is starting soon
         for event in config.listofEvents.events:
             timeTillStart = event.datetime - datetime.now()
@@ -195,8 +233,7 @@ class EventCommands(commands.GroupCog, name="event"):
                     usersPlaying = []
                     playableGames = []
                     notOwned = []
-                    guild = self.bot.get_guild(config.GUILD)
-                    channel = guild.system_channel
+                    channel = self.getChannel(event.location[1:])
                     for response in event.responses:
                         if response.response == eventResponses[0]:
                             usersPlaying.append(response.discordname)
@@ -212,7 +249,7 @@ class EventCommands(commands.GroupCog, name="event"):
                     for game in playableGames:
                         for user in usersPlaying:
                             userFile = config.listofUsers.findUser(discordname=user)
-                            if game not in userFile.games:
+                            if game not in userFile.games and game not in notOwned:
                                 notOwned.append(game)
                     for game in notOwned:
                         playableGames.remove(game)

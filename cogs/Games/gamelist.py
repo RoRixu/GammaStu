@@ -30,7 +30,7 @@ class gameList:
             if game.maxPlayers == None:
                 informationMissing = True
                 missing = missing + "-max players\n\t"
-            if not game.platform:
+            if not game.platforms:
                 informationMissing = True
                 missing = missing + "-platform\n\t"
             if informationMissing:
@@ -106,13 +106,8 @@ class gameList:
     def addPlatformtoGame(self,**kwargs):
         game = self.findGame(**kwargs)
         if game:
-            if not kwargs["platform"] in game.platform:
-                game.addPlatform(kwargs["platform"])
-                returnstr = game.name + " is now on " + kwargs["platform"]
-                return returnstr
-            else:
-                returnstr = game.name + " is already on " + kwargs["platform"]
-                return returnstr
+            returnstr = game.addPlatform(**kwargs)
+            return returnstr
         else:
             if kwargs.get("name", None) != None:
                 returnstr = "Could not find Game with name: {gamename}.".format(gamename=kwargs["name"])
@@ -122,19 +117,17 @@ class gameList:
     def removePlatformfromGame(self,**kwargs):
         game = self.findGame(**kwargs)
         if game:
-            if kwargs["platform"] in game.platform:
-                returnstr = "{name} is no longer on {platform}.".format(name=game.name, platform=kwargs["platform"])
-                game.removePlatform(kwargs["platform"])
-                return returnstr
-            else:
-                returnstr = "{name} is already not on {platform}".format(name=game.name,platform=kwargs["platform"])
-                return returnstr
+            returnstr = game.removePlatform(**kwargs)
+            return returnstr
         else:
             if kwargs.get("name", None) != None:
                 returnstr = "Could not find Game with name: {gamename}.".format(gamename=kwargs["name"])
             if kwargs.get("alias", None) != None:
                 returnstr = "Could not find Game with name: {gamename}.".format(gamename=kwargs["alias"])
             return returnstr
+    def updateIcon(self,**kwargs):
+        game = self.findGame(**kwargs)
+        game.iconURL= kwargs["iconURL"]
     def checkCost(self,**kwargs):
         game = self.findGame(**kwargs)
         if game:
@@ -176,12 +169,11 @@ class gameList:
     def gameInfo(self,**kwargs):
         game = self.findGame(**kwargs)
         if game:
-            platformList = "\n\t\t-".join(game.platform)
-            aliasList = "\n\t\t-".join(game.alias)
-            returnstr = "{name}\n\tCost: {cost}\n\tMax Players: {maxPlayers}\n\tPlayable on Gamenight: {gameNightPlayable}\n\tPlatforms:\n\t\t-{platforms}\n\tAliases:\n\t\t-{alias}".format(
-                name=game.name,cost=game.cost,maxPlayers=game.maxPlayers,gameNightPlayable = game.gameNightPlayable,
-                platforms=platformList,alias=aliasList)
-            return returnstr
+            embed = game.createEmbed()
+            return embed
         else:
-            returnstr = "Could not find Game with name: {gamename}.".format(gamename=kwargs["name"])
-            return returnstr
+            return
+    def sortGames(self):
+        self.games.sort(key=lambda game: game.name.lower())
+        for game in self.games:
+            game.sortGame()

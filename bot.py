@@ -19,10 +19,12 @@ class Bot(commands.Bot):
 
         super().__init__(command_prefix=commands.when_mentioned_or('^'), intents=intents,application_id=config.APP_ID)
     async def setup_hook(self):
+
         await self.load_extension(f'cogs.Users.usercommands')
+        await self.load_extension(f'cogs.Lobby.lobbyCommands')
         await self.load_extension(f'cogs.Games.gamecommands')
         await self.load_extension(f'cogs.Events.eventcommands')
-        #await self.load_extension(f'cogs.Admin.admincommands')
+        await self.load_extension(f'cogs.Admin.admincommands')
         await self.tree.sync()
 
 
@@ -35,17 +37,22 @@ class Bot(commands.Bot):
                 if not member.bot:
                     if not config.listofUsers.findUser(discordname=member.name):
                         print("User {member} found in guild attemping to add to user list.".format(member=member.name))
-                        config.listofUsers.addUser(discordname=member.name, nick=member.display_name)
+                        config.listofUsers.addUser(discordname=member.name, nick=member.display_name,memberid=member.id)
                         filehandler.writetofiles()
+                    user = config.listofUsers.findUser(discordname=member.name)
+                    user.memberid = member.id
         print("Set up complete\n-----\n\n")
     async def on_presence_update(self,prev, cur):
         if not cur.bot:
             if cur.activity != prev.activity and cur.activity != None:
                 for activity in cur.activities:
                     if isinstance(activity,discord.Activity):
-                        istracked = config.listofUsers.findUser(discordname=cur.name).tracking
-                        if istracked:
+                        if config.listofUsers.findUser(discordname=cur.name).tracking:
                             config.listofUsers.addGametoUser(discordname=cur.name, game=cur.activity.name)
+                            if not config.listofGames.findGame(name=cur.activity.name):
+                                config.listofGames.addGame(name=cur.activity.name)
+                            config.listofGames.updateIcon(name=cur.activity.name,iconURL=cur.activity.large_image_url)
+                            filehandler.writetofiles()
                     else:
                         return
     async def on_member_update(self,prev,cur):
@@ -66,8 +73,14 @@ class Bot(commands.Bot):
 
 client = Bot()
 filehandler.loadfiles()
+
+@client.tree.context_menu(name="User info")
+async def contextUserInfo(interaction: discord.Interaction, member: discord.Member):
+    embed, image = config.listofUsers.personInfo(type="Long", discordname=member.name)
+    await interaction.response.send_message(file=image,embed=embed)
+
+
 async def start():
     async with client:
-        client.tree.copy_global_to(guild=discord.Object(id=config.GUILD))
         await client.start(config.TOKEN)
 asyncio.run(start())

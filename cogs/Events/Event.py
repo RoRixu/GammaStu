@@ -22,9 +22,11 @@ class event:
     def addResponse(self,**kwargs):
         if not self.findResponse(kwargs["discordname"]):
             self.responses.append(response(kwargs))
+            self.sortEvent()
         else:
             self.removeResponse(discordname=kwargs["discordname"])
             self.responses.append((response(kwargs)))
+            self.sortEvent()
     def removeResponse(self,**kwargs):
         response = self.findResponse(kwargs["discordname"])
         if response:
@@ -37,13 +39,13 @@ class event:
         late = []
         for i in self.responses:
             if i.response == config.EVENTOPTIONS[0]:
-                yes.append(i.discordname)
+                yes.append(config.listofUsers.findUser(discordname= i.discordname).nick)
             elif i.response == config.EVENTOPTIONS[1]:
-                no.append(i.discordname)
+                no.append(config.listofUsers.findUser(discordname=i.discordname).nick)
             elif i.response == config.EVENTOPTIONS[2]:
-                late.append(i.discordname)
+                late.append(config.listofUsers.findUser(discordname=i.discordname).nick)
             elif i.response == config.EVENTOPTIONS[3]:
-                maybe.append(i.discordname)
+                maybe.append(config.listofUsers.findUser(discordname=i.discordname).nick)
         if len(yes) == 0:
             yes.append("None")
         if len(no) == 0:
@@ -66,6 +68,8 @@ class event:
         embed.add_field(name="Will maybe be there", value=maybe)
         return embed
 
+    def sortEvent(self):
+        self.responses.sort(key=lambda response: response.discordname.lower())
 
 class response:
     def __init__(self,kwargs):

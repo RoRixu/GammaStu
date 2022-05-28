@@ -930,6 +930,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
             return False
 
         bucket = self._buckets.get_bucket(ctx.message)
+        if bucket is None:
+            return False
         dt = ctx.message.edited_at or ctx.message.created_at
         current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
         return bucket.get_tokens(current) == 0
@@ -948,7 +950,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         """
         if self._buckets.valid:
             bucket = self._buckets.get_bucket(ctx.message)
-            bucket.reset()
+            if bucket is not None:
+                bucket.reset()
 
     def get_cooldown_retry_after(self, ctx: Context[BotT], /) -> float:
         """Retrieves the amount of seconds before this command can be tried again.
@@ -972,6 +975,8 @@ class Command(_BaseCommand, Generic[CogT, P, T]):
         """
         if self._buckets.valid:
             bucket = self._buckets.get_bucket(ctx.message)
+            if bucket is None:
+                return 0.0
             dt = ctx.message.edited_at or ctx.message.created_at
             current = dt.replace(tzinfo=datetime.timezone.utc).timestamp()
             return bucket.get_retry_after(current)
@@ -2275,14 +2280,48 @@ def guild_only() -> Check[Any]:
 
     This check raises a special exception, :exc:`.NoPrivateMessage`
     that is inherited from :exc:`.CheckFailure`.
+
+    If used on hybrid commands, this will be equivalent to the
+    :func:`discord.app_commands.guild_only` decorator. In an unsupported
+    context, such as a subcommand, this will still fallback to applying the
+    check.
     """
+
+    # Due to implementation quirks, this check has to be re-implemented completely
+    # to work with both app_commands and the command framework.
 
     def predicate(ctx: Context[BotT]) -> bool:
         if ctx.guild is None:
             raise NoPrivateMessage()
         return True
 
-    return check(predicate)
+    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+        if isinstance(func, Command):
+            func.checks.append(predicate)
+            if hasattr(func, '__commands_is_hybrid__'):
+                app_command = getattr(func, 'app_command', None)
+                if app_command:
+                    app_command.guild_only = True
+        else:
+            if not hasattr(func, '__commands_checks__'):
+                func.__commands_checks__ = []
+
+            func.__commands_checks__.append(predicate)
+            func.__discord_app_commands_guild_only__ = True
+
+        return func
+
+    if inspect.iscoroutinefunction(predicate):
+        decorator.predicate = predicate
+    else:
+
+        @functools.wraps(predicate)
+        async def wrapper(ctx: Context[BotT]):
+            return predicate(ctx)
+
+        decorator.predicate = wrapper
+
+    return decorator  # type: ignore
 
 
 def is_owner() -> Check[Any]:
@@ -2309,19 +2348,55 @@ def is_nsfw() -> Check[Any]:
     This check raises a special exception, :exc:`.NSFWChannelRequired`
     that is derived from :exc:`.CheckFailure`.
 
+    If used on hybrid commands, this will be equivalent to setting the
+    application command's ``nsfw`` attribute to ``True``. In an unsupported
+    context, such as a subcommand, this will still fallback to applying the
+    check.
+
     .. versionchanged:: 1.1
 
         Raise :exc:`.NSFWChannelRequired` instead of generic :exc:`.CheckFailure`.
         DM channels will also now pass this check.
     """
 
-    def pred(ctx: Context[BotT]) -> bool:
+    # Due to implementation quirks, this check has to be re-implemented completely
+    # to work with both app_commands and the command framework.
+
+    def predicate(ctx: Context[BotT]) -> bool:
         ch = ctx.channel
-        if ctx.guild is None or (isinstance(ch, (discord.TextChannel, discord.Thread)) and ch.is_nsfw()):
+        if ctx.guild is None or (
+            isinstance(ch, (discord.TextChannel, discord.Thread, discord.VoiceChannel)) and ch.is_nsfw()
+        ):
             return True
         raise NSFWChannelRequired(ch)  # type: ignore
 
-    return check(pred)
+    def decorator(func: Union[Command, CoroFunc]) -> Union[Command, CoroFunc]:
+        if isinstance(func, Command):
+            func.checks.append(predicate)
+            if hasattr(func, '__commands_is_hybrid__'):
+                app_command = getattr(func, 'app_command', None)
+                if app_command:
+                    app_command.nsfw = True
+        else:
+            if not hasattr(func, '__commands_checks__'):
+                func.__commands_checks__ = []
+
+            func.__commands_checks__.append(predicate)
+            func.__discord_app_commands_is_nsfw__ = True
+
+        return func
+
+    if inspect.iscoroutinefunction(predicate):
+        decorator.predicate = predicate
+    else:
+
+        @functools.wraps(predicate)
+        async def wrapper(ctx: Context[BotT]):
+            return predicate(ctx)
+
+        decorator.predicate = wrapper
+
+    return decorator  # type: ignore
 
 
 def cooldown(

@@ -184,6 +184,7 @@ class ConnectionState:
         self.shard_count: Optional[int] = None
         self._ready_task: Optional[asyncio.Task] = None
         self.application_id: Optional[int] = utils._get_as_snowflake(options, 'application_id')
+        self.application_flags: ApplicationFlags = utils.MISSING
         self.heartbeat_timeout: float = options.get('heartbeat_timeout', 60.0)
         self.guild_ready_timeout: float = options.get('guild_ready_timeout', 2.0)
         if self.guild_ready_timeout < 0:
@@ -380,6 +381,9 @@ class ConnectionState:
     def _get_guild(self, guild_id: Optional[int]) -> Optional[Guild]:
         # the keys of self._guilds are ints
         return self._guilds.get(guild_id)  # type: ignore
+
+    def _get_or_create_unavailable_guild(self, guild_id: int) -> Guild:
+        return self._guilds.get(guild_id) or Guild._create_unavailable(state=self, guild_id=guild_id)
 
     def _add_guild(self, guild: Guild) -> None:
         self._guilds[guild.id] = guild
@@ -727,7 +731,7 @@ class ConnectionState:
             inner_data = data['data']
             custom_id = inner_data['custom_id']
             components = inner_data['components']
-            self._view_store.dispatch_modal(custom_id, interaction, components)  # type: ignore
+            self._view_store.dispatch_modal(custom_id, interaction, components)
         self.dispatch('interaction', interaction)
 
     def parse_presence_update(self, data: gw.PresenceUpdateEvent) -> None:
@@ -1482,7 +1486,7 @@ class ConnectionState:
         self.dispatch('raw_typing', raw)
 
     def _get_reaction_user(self, channel: MessageableChannel, user_id: int) -> Optional[Union[User, Member]]:
-        if isinstance(channel, TextChannel):
+        if isinstance(channel, (TextChannel, Thread, VoiceChannel)):
             return channel.guild.get_member(user_id)
         return self.get_user(user_id)
 

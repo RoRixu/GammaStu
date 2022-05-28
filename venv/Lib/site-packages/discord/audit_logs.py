@@ -70,7 +70,19 @@ if TYPE_CHECKING:
     from .app_commands import AppCommand
 
     TargetType = Union[
-        Guild, abc.GuildChannel, Member, User, Role, Invite, Emoji, StageInstance, GuildSticker, Thread, Object, None
+        Guild,
+        abc.GuildChannel,
+        Member,
+        User,
+        Role,
+        Invite,
+        Emoji,
+        StageInstance,
+        GuildSticker,
+        Thread,
+        Object,
+        PartialIntegration,
+        None,
     ]
 
 
@@ -421,6 +433,10 @@ class _AuditLogProxyStageInstanceAction(_AuditLogProxy):
     channel: abc.GuildChannel
 
 
+class _AuditLogProxyMessageBulkDelete(_AuditLogProxy):
+    count: int
+
+
 class AuditLogEntry(Hashable):
     r"""Represents an Audit Log entry.
 
@@ -495,6 +511,7 @@ class AuditLogEntry(Hashable):
             _AuditLogProxyMemberDisconnect,
             _AuditLogProxyPinAction,
             _AuditLogProxyStageInstanceAction,
+            _AuditLogProxyMessageBulkDelete,
             Member, User, None, PartialIntegration,
             Role, Object
         ] = None
@@ -516,6 +533,9 @@ class AuditLogEntry(Hashable):
             elif self.action is enums.AuditLogAction.member_disconnect:
                 # The member disconnect action has a dict with some information
                 self.extra = _AuditLogProxyMemberDisconnect(count=int(extra['count']))
+            elif self.action is enums.AuditLogAction.message_bulk_delete:
+                # The bulk message delete action has the number of messages deleted
+                self.extra = _AuditLogProxyMessageBulkDelete(count=int(extra['count']))
             elif self.action.name.endswith('pin'):
                 # the pin actions have a dict with some information
                 channel_id = int(extra['channel_id'])

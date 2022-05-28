@@ -1,14 +1,35 @@
 {
     "games": [
         {
+            "name": "Borderlands 3",
+            "cost": 15,
+            "maxPlayers": 4,
+            "gameNightPlayable": true,
+            "iconURL": null,
+            "platforms": [
+                {
+                    "platform": "Epic Games",
+                    "URL": "https://store.epicgames.com/en-US/p/borderlands-3"
+                },
+                {
+                    "platform": "Steam",
+                    "URL": "https://store.steampowered.com/app/397540/Borderlands_3/"
+                }
+            ],
+            "alias": [
+                "1"
+            ]
+        },
+        {
             "name": "League of Legends",
             "cost": 0,
             "maxPlayers": 10,
             "gameNightPlayable": false,
-            "platform": [],
+            "iconURL": "https://cdn.discordapp.com/app-assets/401518684763586560/920476458709819483.png",
+            "platforms": [],
             "alias": [
-                "lol",
-                "league"
+                "league",
+                "lol"
             ]
         },
         {
@@ -16,20 +37,9 @@
             "cost": 0,
             "maxPlayers": 8,
             "gameNightPlayable": true,
-            "platform": [],
+            "iconURL": null,
+            "platforms": [],
             "alias": []
-        },
-        {
-            "name": "testing",
-            "cost": 20,
-            "maxPlayers": 1,
-            "gameNightPlayable": true,
-            "platform": [
-                "epic"
-            ],
-            "alias": [
-                "1"
-            ]
         }
     ]
 }

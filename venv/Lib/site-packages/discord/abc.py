@@ -732,12 +732,6 @@ class GuildChannel:
         if base.administrator:
             return Permissions.all()
 
-        if obj.is_timed_out():
-            # Timeout leads to every permission except VIEW_CHANNEL and READ_MESSAGE_HISTORY
-            # being explicitly denied
-            base.value &= Permissions._timeout_mask()
-            return base
-
         # Apply @everyone allow/deny first since it's special
         try:
             maybe_everyone = self._overwrites[0]
@@ -778,6 +772,12 @@ class GuildChannel:
         if not base.read_messages:
             denied = Permissions.all_channel()
             base.value &= ~denied.value
+
+        if obj.is_timed_out():
+            # Timeout leads to every permission except VIEW_CHANNEL and READ_MESSAGE_HISTORY
+            # being explicitly denied
+            # N.B.: This *must* come last, because it's a conclusive mask
+            base.value &= Permissions._timeout_mask()
 
         return base
 
@@ -1814,7 +1814,7 @@ class Connectable(Protocol):
         *,
         timeout: float = 60.0,
         reconnect: bool = True,
-        cls: Callable[[Client, Connectable], T] = MISSING,
+        cls: Callable[[Client, Connectable], T] = VoiceClient,
         self_deaf: bool = False,
         self_mute: bool = False,
     ) -> T:
@@ -1839,11 +1839,11 @@ class Connectable(Protocol):
         self_mute: :class:`bool`
             Indicates if the client should be self-muted.
 
-            .. versionadded: 2.0
+            .. versionadded:: 2.0
         self_deaf: :class:`bool`
             Indicates if the client should be self-deafened.
 
-            .. versionadded: 2.0
+            .. versionadded:: 2.0
 
         Raises
         -------
@@ -1867,12 +1867,7 @@ class Connectable(Protocol):
             raise ClientException('Already connected to a voice channel.')
 
         client = state._get_client()
-
-        if cls is MISSING:
-            cls = VoiceClient
-
-        # The type checker doesn't understand that VoiceClient *is* T here.
-        voice: T = cls(client, self)  # type: ignore
+        voice: T = cls(client, self)
 
         if not isinstance(voice, VoiceProtocol):
             raise TypeError('Type must meet VoiceProtocol abstract base class.')

@@ -31,6 +31,7 @@ class userlist:
                 returnstr = returnstr+" No real name given. Please add one using /addrealname {name}. "
         else:
             returnstr = kwargs["discordname"] + " is already known"
+        self.sortUsers()
         return returnstr
     def removeUser(self,**kwargs):
         user = self.findUser(**kwargs)
@@ -92,17 +93,10 @@ class userlist:
     def personInfo(self,**kwargs):
         user = self.findUser(**kwargs)
         if user:
-            gamelist = "\n\t\t-".join(user.games)
-            returnstr = "{name}:\n\tDiscord Name: {discordname}\n\tNick: {nick}\n\tBeing tracked: {tracking}\n\tGames Owned:\n\t\t-{games}".format(name=user.realname,discordname=user.discordname,nick=user.nick,tracking=user.tracking, games=gamelist)
-            return returnstr
+            embed, image = user.createEmbed(kwargs["type"])
+            return embed, image
         else:
-            if kwargs["discordname"]:
-                returnstr = "Could not find User with name: "+ kwargs["discordname"]
-            elif kwargs["realname"]:
-                returnstr = "Could not find User with name: " + kwargs["realname"]
-            elif kwargs["nick"]:
-                returnstr = "Could not find User with name: " + kwargs["discordname"]
-            return returnstr
+            return
     def listofUsers(self,**kwargs):
         returnstr = "Information is being kept for:\n"
         i = 1
@@ -120,6 +114,11 @@ class userlist:
             user.tracking = True
             returnstr = "γStu will now track games for {name}.".format(name=user.realname)
             return returnstr
+
+    def sortUsers(self):
+        self.users.sort(key=lambda user: user.nick.lower())
+        for user in self.users:
+            user.sortGames()
 
 
 

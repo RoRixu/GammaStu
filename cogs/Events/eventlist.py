@@ -1,4 +1,5 @@
 from cogs.Events import Event
+from config import config
 eventResponses = ['Will be there','Will not be there','Will be there but late','Will maybe be there']
 class eventList:
     def __init__(self):
@@ -20,6 +21,7 @@ class eventList:
             event = Event.event(kwargs)
             self.events.append(event)
             returnstr = "A new event is happening in Newlore: {name}".format(name=event.name)
+            self.sortEvents()
             return returnstr
         else:
             returnstr = "{event} has already been added".format(event=kwargs["name"])
@@ -39,6 +41,7 @@ class eventList:
         event = self.findEvent(name=kwargs["name"])
         if event:
             event.addResponse(discordname=kwargs['discordname'],response=kwargs['response'])
+            self.sortEvents()
         else:
             returnstr = "Could not find event with name {event}".format(event=kwargs["name"])
             return returnstr
@@ -62,18 +65,15 @@ class eventList:
     def eventInfo(self,**kwargs):
         event = self.findEvent(name=kwargs["name"])
         if event:
-            time = event.datetime.strftime("%I:%M%p on %B %d %Y")
-            responseList = "\n\t\t"
-            for response in event.responses:
-                responseList = "{prev}-{name}: {response}\n\t\t".format(prev=responseList,name=response.discordname,response=response.response)
-            returnstr = "{name}\n\tDescription: {description}\n\tLocation: {location}\n\tWhen: {datetime}\n\tResponses: {responseList}".format(
-                name=event.name,description=event.description,location=event.location,datetime=time,responseList=responseList
-            )
-            return returnstr
+            embed = event.eventEmbed()
+            return None, embed
         else:
             returnstr = "Could not find event with name: {eventname}".formate(eventname=kwargs["name"])
-            return returnstr
-
+            return returnstr, None
+    def sortEvents(self):
+        self.events.sort(key= lambda event: event.name.lower())
+        for event in self.events:
+            event.sortEvent()
 
     def eventEmbed(self,**kwargs):
         event = self.findEvent(name=kwargs["name"])
